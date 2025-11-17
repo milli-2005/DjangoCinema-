@@ -1,83 +1,84 @@
 {% extends 'core/base.html' %}
 
 {% block content %}
-<div class="sessions-container">
-    <div class="sessions-header">
-        <h1>Киносеансы</h1>
-        <p>Выберите фильм и забронируйте место</p>
-    </div>
+<div class="container">
+    <h1 style="text-align: center; margin-bottom: 2rem; background: linear-gradient(45deg, #6a11cb, #2575fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Сеансы</h1>
 
+    <!-- Поиск -->
     <div class="search-box">
-        <form method="get" class="search-form">
-            <input type="text" name="search" class="search-input"
-                   placeholder="Поиск фильмов..." value="{{ request.GET.search }}">
-            <button type="submit" class="search-btn">🔍</button>
+        <form method="get">
+            <input type="text" name="search" class="search-input" placeholder="Поиск фильмов..." value="{{ request.GET.search }}">
+            <button type="submit" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #fff; cursor: pointer;">🔍</button>
         </form>
     </div>
 
-    {% if sessions %}
-        <div class="movie-grid">
-            {% for session in sessions %}
-                <div class="movie-card">
-                    <div class="movie-poster-container">
-                        {% if session.image %}
-                            <img src="{{ session.image.url }}" alt="{{ session.title }}" class="movie-poster">
-                        {% else %}
-                            <div class="no-poster">Нет постера</div>
-                        {% endif %}
-                        <div class="movie-overlay">
-                            <a href="{% url 'book_session' session.id %}" class="btn btn-book">Забронировать</a>
-                        </div>
+    <!-- Сетка фильмов -->
+    <div class="movie-grid">
+        {% for session in sessions %}
+        <div class="movie-card">
+            {% if session.image %}
+                <img src="{{ session.image.url }}" alt="{{ session.title }}" class="movie-poster">
+            {% else %}
+                <div class="no-poster" style="height: 400px; background: linear-gradient(45deg, #2d3047, #1a1a2e); display: flex; align-items: center; justify-content: center; color: #6a11cb; font-size: 1.2rem; font-weight: bold;">
+                    🎬 Нет постера
+                </div>
+            {% endif %}
+
+            <div class="movie-info">
+                <h3 style="color: #fff; margin-bottom: 0.5rem;">{{ session.title }}</h3>
+                <p style="color: #aaa; margin-bottom: 1rem; font-size: 0.9rem;">
+                    {{ session.description|truncatewords:20 }}
+                </p>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 1rem;">
+                    <div>
+                        <small style="color: #6a11cb;">📅 Дата</small>
+                        <p style="color: #fff; font-size: 0.9rem;">{{ session.date|date:"d.m.Y H:i" }}</p>
                     </div>
-                    <div class="movie-info">
-                        <h3 class="movie-title">{{ session.title }}</h3>
-                        <p class="movie-description">{{ session.description|truncatewords:20 }}</p>
-                        <div class="movie-details">
-                            <div class="detail-item">
-                                <span class="detail-label">📅</span>
-                                <span>{{ session.date|date:"d.m.Y H:i" }}</span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="detail-label">⏱</span>
-                                <span>{{ session.duration }} мин.</span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="detail-label">💰</span>
-                                <span>{{ session.price }} руб.</span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="detail-label">💺</span>
-                                <span>{{ session.seats_available }} мест</span>
-                            </div>
-                        </div>
+                    <div>
+                        <small style="color: #6a11cb;">⏱ Длительность</small>
+                        <p style="color: #fff; font-size: 0.9rem;">{{ session.duration }} мин.</p>
+                    </div>
+                    <div>
+                        <small style="color: #6a11cb;">💰 Цена</small>
+                        <p style="color: #fff; font-size: 0.9rem;">{{ session.price }} руб.</p>
+                    </div>
+                    <div>
+                        <small style="color: #6a11cb;">🎟 Места</small>
+                        <p style="color: #fff; font-size: 0.9rem;">{{ session.seats_available }}</p>
                     </div>
                 </div>
-            {% endfor %}
+
+                {% if user.is_authenticated and not user.is_staff %}
+                    {% if session.seats_available > 0 %}
+                        <a href="{% url 'book_session' session.id %}" class="btn" style="width: 100%; text-align: center;">Забронировать</a>
+                    {% else %}
+                        <button class="btn" style="width: 100%; background: #ff2e63; cursor: not-allowed;" disabled>Нет мест</button>
+                    {% endif %}
+                {% endif %}
+            </div>
         </div>
-
-        <!-- Пагинация -->
-        <div class="pagination">
-            {% if sessions.has_previous %}
-                <a href="?page=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="page-link">Первая</a>
-                <a href="?page={{ sessions.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="page-link">Назад</a>
-            {% endif %}
-
-            <span class="current-page">
-                Страница {{ sessions.number }} из {{ sessions.paginator.num_pages }}
-            </span>
-
-            {% if sessions.has_next %}
-                <a href="?page={{ sessions.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="page-link">Вперед</a>
-                <a href="?page={{ sessions.paginator.num_pages }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="page-link">Последняя</a>
-            {% endif %}
-        </div>
-    {% else %}
-        <div class="no-sessions">
+        {% empty %}
+        <div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: #aaa;">
             <p>Сеансы не найдены</p>
-            {% if request.GET.search %}
-                <a href="{% url 'movie_sessions' %}" class="btn btn-primary">Показать все сеансы</a>
-            {% endif %}
         </div>
+        {% endfor %}
+    </div>
+
+    <!-- Пагинация -->
+    {% if sessions.has_other_pages %}
+    <div class="pagination">
+        {% if sessions.has_previous %}
+            <a href="?page={{ sessions.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="page-link">← Назад</a>
+        {% endif %}
+
+        <span style="color: #fff; padding: 0.5rem 1rem;">
+            Страница {{ sessions.number }} из {{ sessions.paginator.num_pages }}
+        </span>
+
+        {% if sessions.has_next %}
+            <a href="?page={{ sessions.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="page-link">Вперед →</a>
+        {% endif %}
+    </div>
     {% endif %}
 </div>
 {% endblock %}

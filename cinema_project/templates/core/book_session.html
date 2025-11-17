@@ -1,61 +1,42 @@
 {% extends 'core/base.html' %}
 
 {% block content %}
-<div class="booking-container">
-    <div class="booking-card-detailed">
-        <div class="booking-poster-large">
-            {% if session.image %}
-                <img src="{{ session.image.url }}" alt="{{ session.title }}">
-            {% else %}
-                <div class="no-poster-large">Нет постера</div>
-            {% endif %}
+<div class="form-container">
+    <h2 style="text-align: center; margin-bottom: 2rem; background: linear-gradient(45deg, #6a11cb, #2575fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Бронирование сеанса</h2>
+
+    {% if error %}
+        <div class="error-message" style="background: rgba(255, 46, 99, 0.2); border: 1px solid #ff2e63; padding: 1rem; border-radius: 10px; margin-bottom: 1rem;">
+            {{ error }}
         </div>
+    {% endif %}
 
-        <div class="booking-details">
-            <h1>{{ session.title }}</h1>
-            <p class="movie-description-full">{{ session.description }}</p>
+    <div style="background: rgba(45, 48, 71, 0.6); padding: 1.5rem; border-radius: 15px; margin-bottom: 2rem;">
+        <h3 style="color: #fff; margin-bottom: 1rem;">{{ session.title }}</h3>
 
-            <div class="session-info">
-                <div class="info-item">
-                    <strong>Дата и время:</strong>
-                    <span>{{ session.date|date:"d.m.Y H:i" }}</span>
-                </div>
-                <div class="info-item">
-                    <strong>Продолжительность:</strong>
-                    <span>{{ session.duration }} минут</span>
-                </div>
-                <div class="info-item">
-                    <strong>Цена:</strong>
-                    <span class="price">{{ session.price }} руб.</span>
-                </div>
-                <div class="info-item">
-                    <strong>Доступно мест:</strong>
-                    <span class="seats">{{ session.seats_available }}</span>
-                </div>
+        {% if session.image %}
+            <img src="{{ session.image.url }}" alt="{{ session.title }}" style="width: 200px; height: 300px; object-fit: cover; border-radius: 10px; margin-bottom: 1rem;">
+        {% else %}
+            <div style="width: 200px; height: 300px; background: linear-gradient(45deg, #2d3047, #1a1a2e); display: flex; align-items: center; justify-content: center; color: #6a11cb; font-size: 1rem; font-weight: bold; border-radius: 10px; margin-bottom: 1rem;">
+                🎬 Нет постера
             </div>
+        {% endif %}
 
-            {% if session.seats_available > 0 %}
-                <form method="post" class="booking-form">
-                    {% csrf_token %}
-                    <div class="form-group">
-                        <label for="id_seats" class="form-label">Количество мест:</label>
-                        <select name="seats" id="id_seats" class="form-input">
-                            {% for i in "12345" %}
-                                <option value="{{ forloop.counter }}">{{ forloop.counter }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <button type="submit" class="btn btn-primary btn-large">Забронировать</button>
-                </form>
-            {% else %}
-                <div class="no-seats">
-                    <p>❌ К сожалению, на этот сеанс нет свободных мест</p>
-                    <a href="{% url 'movie_sessions' %}" class="btn btn-secondary">Выбрать другой сеанс</a>
-                </div>
-            {% endif %}
-
-            <a href="{% url 'movie_sessions' %}" class="btn-back">← Назад к сеансам</a>
-        </div>
+        <p style="color: #aaa; margin-bottom: 0.5rem;"><strong>Описание:</strong> {{ session.description }}</p>
+        <p style="color: #aaa; margin-bottom: 0.5rem;"><strong>Дата:</strong> {{ session.date|date:"d.m.Y H:i" }}</p>
+        <p style="color: #aaa; margin-bottom: 0.5rem;"><strong>Длительность:</strong> {{ session.duration }} минут</p>
+        <p style="color: #aaa; margin-bottom: 0.5rem;"><strong>Цена:</strong> {{ session.price }} руб.</p>
+        <p style="color: #aaa; margin-bottom: 0.5rem;"><strong>Доступно мест:</strong> {{ session.seats_available }}</p>
     </div>
+
+    {% if session.seats_available > 0 %}
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn" style="width: 100%;">Подтвердить бронирование</button>
+    </form>
+    {% else %}
+    <button class="btn" style="width: 100%; background: #ff2e63; cursor: not-allowed;" disabled>Нет свободных мест</button>
+    {% endif %}
+
+    <a href="{% url 'movie_sessions' %}" class="btn" style="width: 100%; margin-top: 1rem; background: transparent; border: 1px solid #6a11cb;">Вернуться к сеансам</a>
 </div>
 {% endblock %}

@@ -389,3 +389,127 @@ body {
         font-size: 2.5rem;
     }
 }
+/* Добавляем в конец файла style.css */
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.no-poster {
+    background: linear-gradient(45deg, #2d3047, #1a1a2e);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6a11cb;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #fff;
+    font-weight: 500;
+}
+
+.error-message {
+    color: #ff2e63;
+    font-size: 0.8rem;
+    margin-top: 0.5rem;
+}
+
+textarea.form-input {
+    resize: vertical;
+    min-height: 100px;
+    font-family: 'Exo 2', sans-serif;
+}
+
+input[type="file"].form-input {
+    background: transparent;
+    border: 1px dashed #6a11cb;
+    padding: 0.5rem;
+}
+
+input[type="file"].form-input::file-selector-button {
+    background: linear-gradient(45deg, #6a11cb, #2575fc);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-right: 1rem;
+}
+
+/* Добавляем эти стили в конец файла style.css */
+
+.form-container-wide {
+    max-width: none !important;
+    width: 95% !important;
+    margin: 2rem auto !important;
+    padding: 3rem !important;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    align-items: start;
+}
+
+.form-column {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.form-full-width {
+    grid-column: 1 / -1;
+}
+
+/* Улучшаем внешний вид инпутов */
+.form-input-large {
+    font-size: 1.1rem !important;
+    padding: 1.2rem !important;
+    border-radius: 12px !important;
+}
+
+/* Стили для текстовой области */
+textarea.form-input {
+    min-height: 150px;
+    resize: vertical;
+    line-height: 1.5;
+    font-family: 'Exo 2', sans-serif;
+}
+
+/* Группа кнопок */
+.button-group {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.button-group .btn {
+    flex: 1;
+    text-align: center;
+}
+
+/* Эффекты при наведении */
+.form-input:hover {
+    border-color: rgba(106, 17, 203, 0.6) !important;
+    transform: translateY(-1px);
+    transition: all 0.3s ease;
+}
+
+.admin-form-container{
+max-width: 1500px;
+margin: 0 auto;
+}
+.admin-form-container h2{
+    text-align: center;
+}

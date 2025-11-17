@@ -108,6 +108,7 @@ def add_session(request):
         duration = request.POST.get('duration')
         price = request.POST.get('price')
         seats_available = request.POST.get('seats_available')
+        image = request.FILES.get('image')  # Добавляем обработку изображения
 
         if all([title, description, date, duration, price, seats_available]):
             MovieSession.objects.create(
@@ -116,7 +117,8 @@ def add_session(request):
                 date=date,
                 duration=duration,
                 price=price,
-                seats_available=seats_available
+                seats_available=seats_available,
+                image=image  # Сохраняем изображение
             )
             return redirect('movie_sessions')
 
