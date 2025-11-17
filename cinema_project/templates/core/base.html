@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}CinemaHub - Ваш кинотеатр{% endblock %}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <span class="logo-text">🎬 CinemaHub</span>
+            </div>
+            <div class="nav-menu">
+                <a href="{% url 'index' %}" class="nav-link">Главная</a>
+                <a href="{% url 'movie_sessions' %}" class="nav-link">Сеансы</a>
+                {% if user.is_authenticated %}
+                    {% if user.is_staff %}
+                        <a href="{% url 'admin_panel' %}" class="nav-link">Панель управления</a>
+                    {% else %}
+                        <a href="{% url 'profile' %}" class="nav-link">Личный кабинет</a>
+                    {% endif %}
+                    <a href="{% url 'logout' %}" class="nav-link">Выйти ({{ user.username }})</a>
+                {% else %}
+                    <a href="{% url 'login' %}" class="nav-link">Войти</a>
+                    <a href="{% url 'register' %}" class="nav-link">Регистрация</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="message {{ message.tags }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2024 CinemaHub. Все права защищены.</p>
+        </div>
+    </footer>
+
+    <script src="/static/js/main.js"></script>
+</body>
+</html>

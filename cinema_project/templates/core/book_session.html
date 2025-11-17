@@ -1,0 +1,61 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="booking-container">
+    <div class="booking-card-detailed">
+        <div class="booking-poster-large">
+            {% if session.image %}
+                <img src="{{ session.image.url }}" alt="{{ session.title }}">
+            {% else %}
+                <div class="no-poster-large">Нет постера</div>
+            {% endif %}
+        </div>
+
+        <div class="booking-details">
+            <h1>{{ session.title }}</h1>
+            <p class="movie-description-full">{{ session.description }}</p>
+
+            <div class="session-info">
+                <div class="info-item">
+                    <strong>Дата и время:</strong>
+                    <span>{{ session.date|date:"d.m.Y H:i" }}</span>
+                </div>
+                <div class="info-item">
+                    <strong>Продолжительность:</strong>
+                    <span>{{ session.duration }} минут</span>
+                </div>
+                <div class="info-item">
+                    <strong>Цена:</strong>
+                    <span class="price">{{ session.price }} руб.</span>
+                </div>
+                <div class="info-item">
+                    <strong>Доступно мест:</strong>
+                    <span class="seats">{{ session.seats_available }}</span>
+                </div>
+            </div>
+
+            {% if session.seats_available > 0 %}
+                <form method="post" class="booking-form">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="id_seats" class="form-label">Количество мест:</label>
+                        <select name="seats" id="id_seats" class="form-input">
+                            {% for i in "12345" %}
+                                <option value="{{ forloop.counter }}">{{ forloop.counter }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-large">Забронировать</button>
+                </form>
+            {% else %}
+                <div class="no-seats">
+                    <p>❌ К сожалению, на этот сеанс нет свободных мест</p>
+                    <a href="{% url 'movie_sessions' %}" class="btn btn-secondary">Выбрать другой сеанс</a>
+                </div>
+            {% endif %}
+
+            <a href="{% url 'movie_sessions' %}" class="btn-back">← Назад к сеансам</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

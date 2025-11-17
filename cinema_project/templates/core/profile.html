@@ -1,0 +1,50 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="profile-header">
+        <h1>Личный кабинет</h1>
+        <p>Добро пожаловать, {{ user.username }}!</p>
+    </div>
+
+    <div class="bookings-section">
+        <h2>Мои записи на сеансы</h2>
+
+        {% if bookings %}
+            <div class="bookings-grid">
+                {% for booking in bookings %}
+                    <div class="booking-card">
+                        <div class="booking-poster">
+                            {% if booking.session.image %}
+                                <img src="{{ booking.session.image.url }}" alt="{{ booking.session.title }}">
+                            {% else %}
+                                <div class="no-poster">Нет постера</div>
+                            {% endif %}
+                        </div>
+                        <div class="booking-info">
+                            <h3>{{ booking.session.title }}</h3>
+                            <p class="booking-date">
+                                📅 {{ booking.session.date|date:"d.m.Y H:i" }}
+                            </p>
+                            <p class="booking-duration">
+                                ⏱ {{ booking.session.duration }} мин.
+                            </p>
+                            <p class="booking-price">
+                                💰 {{ booking.session.price }} руб.
+                            </p>
+                            <p class="booking-created">
+                                Забронировано: {{ booking.booking_date|date:"d.m.Y H:i" }}
+                            </p>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="no-bookings">
+                <p>У вас пока нет записей на сеансы</p>
+                <a href="{% url 'movie_sessions' %}" class="btn btn-primary">Посмотреть сеансы</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

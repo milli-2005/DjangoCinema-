@@ -1,0 +1,44 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="hero-section">
+    <div class="hero-content">
+        <h1 class="hero-title">Добро пожаловать в <span class="gradient-text">CinemaHub</span></h1>
+        <p class="hero-subtitle">Лучшие фильмы на большом экране с невероятным звуком</p>
+        <div class="hero-buttons">
+            <a href="{% url 'movie_sessions' %}" class="btn btn-primary">Смотреть сеансы</a>
+            {% if not user.is_authenticated %}
+                <a href="{% url 'register' %}" class="btn btn-secondary">Зарегистрироваться</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="features-section">
+    <div class="container">
+        <h2 class="section-title">Почему выбирают нас?</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🎭</div>
+                <h3>Более 100 фильмов</h3>
+                <p>Огромная коллекция фильмов различных жанров</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">💺</div>
+                <h3>Комфортные кресла</h3>
+                <p>Удобные места с системой вентиляции</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🎧</div>
+                <h3>Dolby Atmos</h3>
+                <p>Система объемного звучания для полного погружения</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <h3>Быстрая запись</h3>
+                <p>Простая и удобная система бронирования онлайн</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

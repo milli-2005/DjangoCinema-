@@ -1,0 +1,83 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="sessions-container">
+    <div class="sessions-header">
+        <h1>Киносеансы</h1>
+        <p>Выберите фильм и забронируйте место</p>
+    </div>
+
+    <div class="search-box">
+        <form method="get" class="search-form">
+            <input type="text" name="search" class="search-input"
+                   placeholder="Поиск фильмов..." value="{{ request.GET.search }}">
+            <button type="submit" class="search-btn">🔍</button>
+        </form>
+    </div>
+
+    {% if sessions %}
+        <div class="movie-grid">
+            {% for session in sessions %}
+                <div class="movie-card">
+                    <div class="movie-poster-container">
+                        {% if session.image %}
+                            <img src="{{ session.image.url }}" alt="{{ session.title }}" class="movie-poster">
+                        {% else %}
+                            <div class="no-poster">Нет постера</div>
+                        {% endif %}
+                        <div class="movie-overlay">
+                            <a href="{% url 'book_session' session.id %}" class="btn btn-book">Забронировать</a>
+                        </div>
+                    </div>
+                    <div class="movie-info">
+                        <h3 class="movie-title">{{ session.title }}</h3>
+                        <p class="movie-description">{{ session.description|truncatewords:20 }}</p>
+                        <div class="movie-details">
+                            <div class="detail-item">
+                                <span class="detail-label">📅</span>
+                                <span>{{ session.date|date:"d.m.Y H:i" }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">⏱</span>
+                                <span>{{ session.duration }} мин.</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">💰</span>
+                                <span>{{ session.price }} руб.</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">💺</span>
+                                <span>{{ session.seats_available }} мест</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Пагинация -->
+        <div class="pagination">
+            {% if sessions.has_previous %}
+                <a href="?page=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="page-link">Первая</a>
+                <a href="?page={{ sessions.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="page-link">Назад</a>
+            {% endif %}
+
+            <span class="current-page">
+                Страница {{ sessions.number }} из {{ sessions.paginator.num_pages }}
+            </span>
+
+            {% if sessions.has_next %}
+                <a href="?page={{ sessions.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="page-link">Вперед</a>
+                <a href="?page={{ sessions.paginator.num_pages }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="page-link">Последняя</a>
+            {% endif %}
+        </div>
+    {% else %}
+        <div class="no-sessions">
+            <p>Сеансы не найдены</p>
+            {% if request.GET.search %}
+                <a href="{% url 'movie_sessions' %}" class="btn btn-primary">Показать все сеансы</a>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
