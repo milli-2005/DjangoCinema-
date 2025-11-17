@@ -132,3 +132,10 @@ def delete_booking(request, booking_id):
         booking.session.save()
         booking.delete()
         return redirect('admin_panel')
+
+
+
+from django.contrib.auth import logout as auth_logout
+def custom_logout(request):
+    auth_logout(request)
+    return redirect('index')
