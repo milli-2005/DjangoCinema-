@@ -6,7 +6,7 @@ urlpatterns = [
     path('', views.index, name='index'),
     path('register/', views.register, name='register'),
     path('login/', views.custom_login, name='login'),
-    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path('logout/', views.custom_logout, name='custom_logout'),
     path('profile/', views.profile, name='profile'),
 
     # Публичные страницы

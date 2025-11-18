@@ -21,7 +21,7 @@
                     {% else %}
                         <a href="{% url 'profile' %}" class="nav-link">Личный кабинет</a>
                     {% endif %}
-                    <a href="{% url 'logout' %}" class="nav-link">Выйти ({{ user.username }})</a>
+                    <a href="{% url 'custom_logout' %}" class="nav-link">Выйти ({{ user.username }})</a>
                 {% else %}
                     <a href="{% url 'login' %}" class="nav-link">Войти</a>
                     <a href="{% url 'register' %}" class="nav-link">Регистрация</a>

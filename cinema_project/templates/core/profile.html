@@ -2,49 +2,588 @@
 
 {% block content %}
 <div class="profile-container">
+    <!-- Заголовок и статистика -->
     <div class="profile-header">
-        <h1>Личный кабинет</h1>
-        <p>Добро пожаловать, {{ user.username }}!</p>
+        <div class="user-info-card">
+            <div class="user-avatar">
+                <div class="avatar-icon">👤</div>
+            </div>
+            <div class="user-details">
+                <h1 class="user-name">{{ user.first_name|default:user.username }}</h1>
+                <p class="user-email">{{ user.email|default:"Email не указан" }}</p>
+                <div class="user-stats">
+                    <div class="stat-badge">
+                        <span class="stat-number">{{ bookings.count }}</span>
+                        <span class="stat-label">бронирований</span>
+                    </div>
+                    <div class="stat-badge">
+                        <span class="stat-number">{{ total_spent|default:0 }}</span>
+                        <span class="stat-label">руб. потрачено</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="quick-actions">
+            <a href="{% url 'movie_sessions' %}" class="action-btn">
+                <span class="action-icon">🎬</span>
+                <span class="action-text">Новое бронирование</span>
+            </a>
+            <a href="{% url 'custom_logout' %}" class="action-btn logout">
+                <span class="action-icon">🚪</span>
+                <span class="action-text">Выйти</span>
+            </a>
+        </div>
     </div>
 
-    <div class="bookings-section">
-        <h2>Мои записи на сеансы</h2>
+    <!-- Активные бронирования -->
+    <section class="bookings-section">
+        <div class="section-header">
+            <h2 class="section-title">🎟️ Мои бронирования</h2>
+            <div class="section-badge">{{ bookings.count }}</div>
+        </div>
 
         {% if bookings %}
-            <div class="bookings-grid">
-                {% for booking in bookings %}
-                    <div class="booking-card">
-                        <div class="booking-poster">
-                            {% if booking.session.image %}
-                                <img src="{{ booking.session.image.url }}" alt="{{ booking.session.title }}">
-                            {% else %}
-                                <div class="no-poster">Нет постера</div>
-                            {% endif %}
+        <div class="bookings-grid">
+            {% for booking in bookings %}
+            <div class="booking-card {% if booking.session.date < now %}past{% endif %}">
+                <div class="booking-header">
+                    <div class="movie-title">{{ booking.session.title }}</div>
+                    <div class="booking-status {% if booking.session.date < now %}status-past{% else %}status-active{% endif %}">
+                        {% if booking.session.date < now %}
+                            Завершен
+                        {% else %}
+                            Активно
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="booking-details">
+                    <div class="detail-row">
+                        <div class="detail-item">
+                            <span class="detail-label">📅 Дата и время</span>
+                            <span class="detail-value">{{ booking.session.date|date:"d.m.Y H:i" }}</span>
                         </div>
-                        <div class="booking-info">
-                            <h3>{{ booking.session.title }}</h3>
-                            <p class="booking-date">
-                                📅 {{ booking.session.date|date:"d.m.Y H:i" }}
-                            </p>
-                            <p class="booking-duration">
-                                ⏱ {{ booking.session.duration }} мин.
-                            </p>
-                            <p class="booking-price">
-                                💰 {{ booking.session.price }} руб.
-                            </p>
-                            <p class="booking-created">
-                                Забронировано: {{ booking.booking_date|date:"d.m.Y H:i" }}
-                            </p>
+                        <div class="detail-item">
+                            <span class="detail-label">⏱ Длительность</span>
+                            <span class="detail-value">{{ booking.session.duration }} мин.</span>
                         </div>
                     </div>
-                {% endfor %}
+
+                    <div class="detail-row">
+                        <div class="detail-item">
+                            <span class="detail-label">💰 Цена за билет</span>
+                            <span class="detail-value">{{ booking.session.price }} руб.</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">🎫 Количество мест</span>
+                            <span class="detail-value">{{ booking.seats }} шт.</span>
+                        </div>
+                    </div>
+
+                    <div class="detail-row total-row">
+                        <div class="detail-item">
+                            <span class="detail-label">💵 Общая стоимость</span>
+                            <span class="detail-value total-price">
+                                {{ booking.total_price|default:booking.session.price }} руб.
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="booking-footer">
+                    <div class="booking-date">
+                        Забронировано: {{ booking.booking_date|date:"d.m.Y H:i" }}
+                    </div>
+                    {% if booking.session.date > now %}
+                    <div class="time-remaining">
+                        ⏰ Осталось: <span class="countdown" data-date="{{ booking.session.date|date:'c' }}"></span>
+                    </div>
+                    {% endif %}
+                </div>
             </div>
+            {% endfor %}
+        </div>
         {% else %}
-            <div class="no-bookings">
-                <p>У вас пока нет записей на сеансы</p>
-                <a href="{% url 'movie_sessions' %}" class="btn btn-primary">Посмотреть сеансы</a>
-            </div>
+        <div class="empty-state">
+            <div class="empty-icon">🎭</div>
+            <h3>У вас пока нет бронирований</h3>
+            <p>Найдите интересный фильм и забронируйте места!</p>
+            <a href="{% url 'movie_sessions' %}" class="btn primary-btn">
+                🎬 Смотреть сеансы
+            </a>
+        </div>
         {% endif %}
-    </div>
+    </section>
+
+    <!-- История активности -->
+    <section class="activity-section">
+        <div class="section-header">
+            <h2 class="section-title">📊 История активности</h2>
+        </div>
+        <div class="activity-timeline">
+            {% for booking in bookings %}
+            <div class="activity-item">
+                <div class="activity-icon">🎟️</div>
+                <div class="activity-content">
+                    <div class="activity-title">Бронирование: {{ booking.session.title }}</div>
+                    <div class="activity-date">{{ booking.booking_date|date:"d.m.Y в H:i" }}</div>
+                    <div class="activity-desc">
+                        {{ booking.seats }} место(а) • {{ booking.session.price }} руб. за билет
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="activity-item">
+                <div class="activity-icon">📝</div>
+                <div class="activity-content">
+                    <div class="activity-title">Начните использовать сервис</div>
+                    <div class="activity-desc">Здесь будет отображаться ваша активность</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
 </div>
+
+<style>
+/* Основные стили профиля */
+.profile-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+/* Шапка профиля */
+.profile-header {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 2rem;
+    margin-bottom: 3rem;
+    align-items: start;
+}
+
+.user-info-card {
+    background: linear-gradient(135deg, rgba(106, 17, 203, 0.1), rgba(37, 117, 252, 0.1));
+    border: 1px solid rgba(106, 17, 203, 0.3);
+    border-radius: 20px;
+    padding: 2rem;
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.user-avatar {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(45deg, #6a11cb, #2575fc);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+}
+
+.avatar-icon {
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+}
+
+.user-details {
+    flex: 1;
+}
+
+.user-name {
+    font-size: 2rem;
+    font-weight: 700;
+    background: linear-gradient(45deg, #6a11cb, #2575fc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.5rem;
+}
+
+.user-email {
+    color: #aaa;
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+}
+
+.user-stats {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.stat-badge {
+    text-align: center;
+    padding: 0.5rem 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.stat-number {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #6a11cb;
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    color: #aaa;
+}
+
+/* Быстрые действия */
+.quick-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.action-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem;
+    background: rgba(45, 48, 71, 0.8);
+    border: 1px solid rgba(106, 17, 203, 0.3);
+    border-radius: 12px;
+    text-decoration: none;
+    color: #fff;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.action-btn:hover {
+    transform: translateY(-2px);
+    border-color: #6a11cb;
+    box-shadow: 0 10px 20px rgba(106, 17, 203, 0.3);
+}
+
+.action-btn.logout {
+    border-color: rgba(255, 46, 99, 0.3);
+}
+
+.action-btn.logout:hover {
+    border-color: #ff2e63;
+    box-shadow: 0 10px 20px rgba(255, 46, 99, 0.3);
+}
+
+.action-icon {
+    font-size: 1.2rem;
+}
+
+.action-text {
+    font-weight: 500;
+}
+
+/* Секции */
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.section-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    background: linear-gradient(45deg, #6a11cb, #2575fc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.section-badge {
+    background: #6a11cb;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+/* Сетка бронирований */
+.bookings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+}
+
+.booking-card {
+    background: rgba(45, 48, 71, 0.8);
+    border: 1px solid rgba(106, 17, 203, 0.3);
+    border-radius: 15px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.booking-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(106, 17, 203, 0.2);
+    border-color: #6a11cb;
+}
+
+.booking-card.past {
+    opacity: 0.7;
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.booking-header {
+    display: flex;
+    justify-content: between;
+    align-items: start;
+    margin-bottom: 1rem;
+}
+
+.movie-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #fff;
+    flex: 1;
+}
+
+.booking-status {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.status-active {
+    background: rgba(46, 204, 113, 0.2);
+    color: #2ecc71;
+    border: 1px solid #2ecc71;
+}
+
+.status-past {
+    background: rgba(255, 255, 255, 0.1);
+    color: #aaa;
+    border: 1px solid #aaa;
+}
+
+.booking-details {
+    margin-bottom: 1rem;
+}
+
+.detail-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.detail-label {
+    font-size: 0.8rem;
+    color: #6a11cb;
+    font-weight: 500;
+}
+
+.detail-value {
+    font-size: 1rem;
+    color: #fff;
+    font-weight: 600;
+}
+
+.total-row {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 1rem;
+    margin-top: 1rem;
+}
+
+.total-price {
+    font-size: 1.2rem !important;
+    color: #6a11cb !important;
+}
+
+.booking-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 0.8rem;
+    color: #aaa;
+}
+
+.time-remaining {
+    color: #ff2e63;
+    font-weight: 600;
+}
+
+/* Состояние пустого списка */
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: rgba(45, 48, 71, 0.5);
+    border-radius: 20px;
+    border: 2px dashed rgba(106, 17, 203, 0.3);
+}
+
+.empty-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.empty-state h3 {
+    color: #fff;
+    margin-bottom: 0.5rem;
+    font-size: 1.5rem;
+}
+
+.empty-state p {
+    color: #aaa;
+    margin-bottom: 2rem;
+}
+
+.primary-btn {
+    background: linear-gradient(45deg, #6a11cb, #2575fc);
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.primary-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(106, 17, 203, 0.4);
+}
+
+/* Таймлайн активности */
+.activity-section {
+    margin-top: 3rem;
+}
+
+.activity-timeline {
+    background: rgba(45, 48, 71, 0.5);
+    border-radius: 15px;
+    padding: 2rem;
+    border: 1px solid rgba(106, 17, 203, 0.2);
+}
+
+.activity-item {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.activity-item:last-child {
+    border-bottom: none;
+}
+
+.activity-icon {
+    width: 40px;
+    height: 40px;
+    background: rgba(106, 17, 203, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.activity-content {
+    flex: 1;
+}
+
+.activity-title {
+    color: #fff;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.activity-date {
+    color: #6a11cb;
+    font-size: 0.8rem;
+    margin-bottom: 0.25rem;
+}
+
+.activity-desc {
+    color: #aaa;
+    font-size: 0.9rem;
+}
+
+/* Адаптивность */
+@media (max-width: 968px) {
+    .profile-header {
+        grid-template-columns: 1fr;
+    }
+
+    .bookings-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .detail-row {
+        grid-template-columns: 1fr;
+    }
+
+    .user-info-card {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .user-stats {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .profile-container {
+        padding: 1rem;
+    }
+
+    .booking-footer {
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: start;
+    }
+}
+</style>
+
+<script>
+// Обратный отсчет для активных бронирований
+document.addEventListener('DOMContentLoaded', function() {
+    function updateCountdowns() {
+        const countdowns = document.querySelectorAll('.countdown');
+        const now = new Date();
+
+        countdowns.forEach(countdown => {
+            const targetDate = new Date(countdown.dataset.date);
+            const diff = targetDate - now;
+
+            if (diff <= 0) {
+                countdown.textContent = 'Время вышло';
+                return;
+            }
+
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+            if (days > 0) {
+                countdown.textContent = `${days}д ${hours}ч`;
+            } else if (hours > 0) {
+                countdown.textContent = `${hours}ч ${minutes}м`;
+            } else {
+                countdown.textContent = `${minutes} минут`;
+            }
+        });
+    }
+
+    updateCountdowns();
+    setInterval(updateCountdowns, 60000); // Обновлять каждую минуту
+});
+</script>
 {% endblock %}
