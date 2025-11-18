@@ -1,0 +1,63 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="form-container-wide">
+    <h1 class="page-title" style="color: #ff2e63;">🗑️ Удаление пользователя</h1>
+
+    <div class="warning-message" style="background: rgba(255, 46, 99, 0.1); border: 2px solid #ff2e63; padding: 2rem; border-radius: 15px; margin-bottom: 2rem; text-align: center;">
+        <div style="font-size: 4rem; margin-bottom: 1rem;">⚠️</div>
+        <h3 style="color: #ff2e63; margin-bottom: 1rem;">Вы уверены, что хотите удалить этого пользователя?</h3>
+        <p style="color: #aaa;">Все бронирования пользователя также будут удалены. Это действие невозможно отменить.</p>
+    </div>
+
+    <div class="user-details" style="background: rgba(45, 48, 71, 0.6); padding: 2rem; border-radius: 15px; margin-bottom: 2rem;">
+        <h3 style="color: #fff; margin-bottom: 1rem;">Информация о пользователе</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div>
+                <p style="color: #6a11cb; margin-bottom: 0.5rem;"><strong>ID:</strong></p>
+                <p style="color: #fff;">{{ user.id }}</p>
+            </div>
+            <div>
+                <p style="color: #6a11cb; margin-bottom: 0.5rem;"><strong>Логин:</strong></p>
+                <p style="color: #fff;">{{ user.username }}</p>
+            </div>
+            <div>
+                <p style="color: #6a11cb; margin-bottom: 0.5rem;"><strong>Имя:</strong></p>
+                <p style="color: #fff;">{{ user.first_name|default:"-" }}</p>
+            </div>
+            <div>
+                <p style="color: #6a11cb; margin-bottom: 0.5rem;"><strong>Email:</strong></p>
+                <p style="color: #fff;">{{ user.email|default:"-" }}</p>
+            </div>
+            <div>
+                <p style="color: #6a11cb; margin-bottom: 0.5rem;"><strong>Дата регистрации:</strong></p>
+                <p style="color: #fff;">{{ user.date_joined|date:"d.m.Y" }}</p>
+            </div>
+            <div>
+                <p style="color: #6a11cb; margin-bottom: 0.5rem;"><strong>Бронирований:</strong></p>
+                <p style="color: #fff;">{{ user.booking_set.count }}</p>
+            </div>
+        </div>
+    </div>
+
+    {% if user == request.user %}
+    <div class="error-message" style="background: rgba(255, 46, 99, 0.2); border: 1px solid #ff2e63; padding: 1rem; border-radius: 10px; margin-bottom: 1rem; text-align: center;">
+        <p style="color: #ff2e63; margin: 0;">❌ Вы не можете удалить свой собственный аккаунт!</p>
+    </div>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="button-group">
+            {% if user != request.user %}
+            <button type="submit" class="btn" style="background: linear-gradient(45deg, #ff2e63, #ff6b6b);">
+                🗑️ Да, удалить пользователя
+            </button>
+            {% endif %}
+            <a href="{% url 'admin_users' %}" class="btn" style="background: transparent; border: 2px solid #6a11cb;">
+                ↩️ Отмена
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

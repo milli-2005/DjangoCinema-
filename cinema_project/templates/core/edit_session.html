@@ -1,0 +1,126 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="form-container-wide">
+    <h1 class="page-title">✏️ Редактирование сеанса</h1>
+
+    <div class="session-info" style="background: rgba(45, 48, 71, 0.6); padding: 2rem; border-radius: 15px; margin-bottom: 2rem;">
+        <h3 style="color: #fff; margin-bottom: 1rem;">Текущая информация о сеансе</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div>
+                <p style="color: #6a11cb; margin-bottom: 0.5rem;"><strong>Текущий постер:</strong></p>
+                {% if session.image %}
+                    <img src="{{ session.image.url }}" alt="{{ session.title }}" style="width: 150px; height: 200px; object-fit: cover; border-radius: 10px;">
+                {% else %}
+                    <div style="width: 150px; height: 200px; background: linear-gradient(45deg, #2d3047, #1a1a2e); display: flex; align-items: center; justify-content: center; color: #6a11cb; font-size: 1.2rem; border-radius: 10px;">
+                        🎬 Нет постера
+                    </div>
+                {% endif %}
+            </div>
+            <div>
+                <p style="color: #6a11cb; margin-bottom: 0.5rem;"><strong>Бронирований:</strong></p>
+                <p style="color: #fff;">{{ session.booking_set.count }}</p>
+
+                <p style="color: #6a11cb; margin-bottom: 0.5rem;"><strong>ID сеанса:</strong></p>
+                <p style="color: #fff;">{{ session.id }}</p>
+            </div>
+        </div>
+    </div>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="form-grid">
+            <!-- Левая колонка -->
+            <div class="form-column">
+                <div class="form-group">
+                    <label for="title">Название фильма *</label>
+                    <input type="text" name="title" id="title" class="form-input form-input-large"
+                           value="{{ session.title }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="date">Дата и время сеанса *</label>
+                    <input type="datetime-local" name="date" id="date" class="form-input form-input-large"
+                           value="{{ session.date|date:'Y-m-d\TH:i' }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="duration">Продолжительность (минут) *</label>
+                    <input type="number" name="duration" id="duration" class="form-input form-input-large"
+                           value="{{ session.duration }}" min="1" required>
+                </div>
+            </div>
+
+            <!-- Правая колонка -->
+            <div class="form-column">
+                <div class="form-group">
+                    <label for="price">Цена (руб.) *</label>
+                    <input type="number" step="0.01" name="price" id="price" class="form-input form-input-large"
+                           value="{{ session.price }}" min="0" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="seats_available">Количество мест *</label>
+                    <input type="number" name="seats_available" id="seats_available" class="form-input form-input-large"
+                           value="{{ session.seats_available }}" min="0" required>
+                    <small style="color: #aaa; font-size: 0.9rem;">
+                        Уже забронировано: {{ session.booking_set.count }} мест
+                    </small>
+                </div>
+
+                <div class="form-group">
+                    <label for="image">Новый постер фильма</label>
+                    <div class="file-input-container">
+                        <input type="file" name="image" id="image" accept="image/*" onchange="updateFileName(this)">
+                        <label for="image" class="file-input-label">
+                            📁 Выберите новый постер
+                            <div class="file-name" id="fileName">Файл не выбран</div>
+                        </label>
+                    </div>
+                    <small style="color: #aaa; font-size: 0.9rem;">
+                        Оставьте пустым, чтобы сохранить текущий постер
+                    </small>
+                </div>
+            </div>
+
+            <!-- Полная ширина -->
+            <div class="form-full-width">
+                <div class="form-group">
+                    <label for="description">Описание фильма *</label>
+                    <textarea name="description" id="description" class="form-input form-input-large"
+                              required>{{ session.description }}</textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="button-group">
+            <button type="submit" class="btn glow-effect">
+                💾 Сохранить изменения
+            </button>
+            <a href="{% url 'admin_sessions' %}" class="btn" style="background: transparent; border: 2px solid #6a11cb;">
+                ❌ Отмена
+            </a>
+        </div>
+    </form>
+</div>
+
+<script>
+function updateFileName(input) {
+    const fileName = input.files[0] ? input.files[0].name : 'Файл не выбран';
+    document.getElementById('fileName').textContent = fileName;
+}
+
+// Валидация формы
+document.querySelector('form').addEventListener('submit', function(e) {
+    const seatsAvailable = parseInt(document.getElementById('seats_available').value);
+    const bookedSeats = {{ session.booking_set.count }};
+
+    if (seatsAvailable < bookedSeats) {
+        e.preventDefault();
+        alert(`Ошибка! Нельзя установить ${seatsAvailable} мест, так как уже забронировано ${bookedSeats} мест.`);
+        return false;
+    }
+});
+</script>
+{% endblock %}

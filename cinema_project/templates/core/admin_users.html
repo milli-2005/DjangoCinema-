@@ -1,0 +1,141 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container">
+    <h1 class="page-title">👥 Все пользователи</h1>
+
+    <!-- Поиск -->
+    <div class="search-box">
+        <form method="get">
+            <input type="text" name="search" class="search-input" placeholder="Поиск по имени, логину или email..." value="{{ request.GET.search }}">
+            <button type="submit" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #fff; cursor: pointer;">🔍</button>
+        </form>
+    </div>
+
+    <!-- Таблица пользователей -->
+    <div class="table-container">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Логин</th>
+                    <th>Имя</th>
+                    <th>Email</th>
+                    <th>Дата регистрации</th>
+                    <th>Статус</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>{{ user.id }}</td>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.first_name|default:"-" }}</td>
+                    <td>{{ user.email|default:"-" }}</td>
+                    <td>{{ user.date_joined|date:"d.m.Y" }}</td>
+                    <td>
+                        {% if user.is_staff %}
+                            <span style="color: #6a11cb; font-weight: bold;">Админ</span>
+                        {% else %}
+                            <span style="color: #2575fc;">Пользователь</span>
+                        {% endif %}
+                    </td>
+                    <td class="actions">
+                        <a href="{% url 'edit_user' user.id %}" class="btn-action edit">✏️</a>
+                        <a href="{% url 'delete_user' user.id %}" class="btn-action delete">🗑️</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" style="text-align: center; color: #aaa; padding: 2rem;">
+                        Пользователи не найдены
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Пагинация -->
+    {% if users.has_other_pages %}
+    <div class="pagination">
+        {% if users.has_previous %}
+            <a href="?page={{ users.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="page-link">← Назад</a>
+        {% endif %}
+
+        <span style="color: #fff; padding: 0.5rem 1rem;">
+            Страница {{ users.number }} из {{ users.paginator.num_pages }}
+        </span>
+
+        {% if users.has_next %}
+            <a href="?page={{ users.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="page-link">Вперед →</a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <div style="text-align: center; margin-top: 2rem;">
+        <a href="{% url 'admin_panel' %}" class="btn" style="background: transparent; border: 2px solid #6a11cb;">
+            ↩️ Вернуться в панель управления
+        </a>
+    </div>
+</div>
+
+<style>
+.table-container {
+    background: rgba(45, 48, 71, 0.8);
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin-top: 2rem;
+    overflow-x: auto;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    color: #fff;
+}
+
+.admin-table th {
+    background: linear-gradient(45deg, #6a11cb, #2575fc);
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+}
+
+.admin-table td {
+    padding: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.admin-table tr:hover {
+    background: rgba(106, 17, 203, 0.1);
+}
+
+.actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-action {
+    padding: 0.5rem;
+    border-radius: 5px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.btn-action.edit {
+    background: rgba(37, 117, 252, 0.2);
+    border: 1px solid #2575fc;
+}
+
+.btn-action.delete {
+    background: rgba(255, 46, 99, 0.2);
+    border: 1px solid #ff2e63;
+}
+
+.btn-action:hover {
+    transform: scale(1.1);
+}
+</style>
+{% endblock %}

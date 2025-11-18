@@ -110,8 +110,13 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/profile/'
 LOGOUT_REDIRECT_URL = '/'
+
+# Для админ-панели
+ADMIN_URL = 'admin/'
+
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 

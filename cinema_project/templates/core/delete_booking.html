@@ -1,0 +1,47 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="form-container-wide">
+    <h1 class="page-title" style="color: #ff2e63;">🗑️ Удаление бронирования</h1>
+
+    <div class="warning-message" style="background: rgba(255, 46, 99, 0.1); border: 2px solid #ff2e63; padding: 2rem; border-radius: 15px; margin-bottom: 2rem; text-align: center;">
+        <div style="font-size: 4rem; margin-bottom: 1rem;">⚠️</div>
+        <h3 style="color: #ff2e63; margin-bottom: 1rem;">Вы уверены, что хотите удалить это бронирование?</h3>
+        <p style="color: #aaa;">Это действие невозможно отменить</p>
+    </div>
+
+    <div class="booking-details" style="background: rgba(45, 48, 71, 0.6); padding: 2rem; border-radius: 15px; margin-bottom: 2rem;">
+        <h3 style="color: #fff; margin-bottom: 1rem;">Детали бронирования</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div>
+                <p style="color: #6a11cb; margin-bottom: 0.5rem;"><strong>Пользователь:</strong></p>
+                <p style="color: #fff;">{{ booking.user.username }}</p>
+            </div>
+            <div>
+                <p style="color: #6a11cb; margin-bottom: 0.5rem;"><strong>Фильм:</strong></p>
+                <p style="color: #fff;">{{ booking.session.title }}</p>
+            </div>
+            <div>
+                <p style="color: #6a11cb; margin-bottom: 0.5rem;"><strong>Дата сеанса:</strong></p>
+                <p style="color: #fff;">{{ booking.session.date|date:"d.m.Y H:i" }}</p>
+            </div>
+            <div>
+                <p style="color: #6a11cb; margin-bottom: 0.5rem;"><strong>Количество мест:</strong></p>
+                <p style="color: #fff;">{{ booking.seats }}</p>
+            </div>
+        </div>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="button-group">
+            <button type="submit" class="btn" style="background: linear-gradient(45deg, #ff2e63, #ff6b6b);">
+                🗑️ Да, удалить
+            </button>
+            <a href="{% url 'admin_bookings' %}" class="btn" style="background: transparent; border: 2px solid #6a11cb;">
+                ↩️ Отмена
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

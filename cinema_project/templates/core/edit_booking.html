@@ -1,0 +1,68 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="form-container-wide">
+    <h1 class="page-title">✏️ Редактирование бронирования</h1>
+
+    <div class="booking-info" style="background: rgba(45, 48, 71, 0.6); padding: 2rem; border-radius: 15px; margin-bottom: 2rem;">
+        <h3 style="color: #fff; margin-bottom: 1rem;">Информация о бронировании</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div>
+                <p style="color: #6a11cb; margin-bottom: 0.5rem;"><strong>Пользователь:</strong></p>
+                <p style="color: #fff;">{{ booking.user.username }}</p>
+            </div>
+            <div>
+                <p style="color: #6a11cb; margin-bottom: 0.5rem;"><strong>Фильм:</strong></p>
+                <p style="color: #fff;">{{ booking.session.title }}</p>
+            </div>
+            <div>
+                <p style="color: #6a11cb; margin-bottom: 0.5rem;"><strong>Дата сеанса:</strong></p>
+                <p style="color: #fff;">{{ booking.session.date|date:"d.m.Y H:i" }}</p>
+            </div>
+            <div>
+                <p style="color: #6a11cb; margin-bottom: 0.5rem;"><strong>Свободных мест:</strong></p>
+                <p style="color: #fff;">{{ booking.session.seats_available }}</p>
+            </div>
+        </div>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label for="seats">Количество мест *</label>
+            <input type="number" name="seats" id="seats" class="form-input form-input-large"
+                   value="{{ booking.seats }}" min="1" max="{{ booking.session.seats_available|add:booking.seats }}" required>
+            <small style="color: #aaa; font-size: 0.9rem;">
+                Доступно для изменения: {{ booking.session.seats_available|add:booking.seats }} мест
+            </small>
+        </div>
+
+        <div class="button-group">
+            <button type="submit" class="btn glow-effect">
+                💾 Сохранить изменения
+            </button>
+            <a href="{% url 'admin_bookings' %}" class="btn" style="background: transparent; border: 2px solid #6a11cb;">
+                ❌ Отмена
+            </a>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const seatsInput = document.getElementById('seats');
+    const maxSeats = {{ booking.session.seats_available|add:booking.seats }};
+
+    seatsInput.addEventListener('change', function() {
+        if (parseInt(this.value) > maxSeats) {
+            this.value = maxSeats;
+            alert(`Максимальное количество мест: ${maxSeats}`);
+        }
+        if (parseInt(this.value) < 1) {
+            this.value = 1;
+        }
+    });
+});
+</script>
+{% endblock %}
