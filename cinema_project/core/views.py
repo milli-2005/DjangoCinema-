@@ -71,21 +71,37 @@ def admin_panel(request):
         'total_bookings': total_bookings,
         'active_sessions': active_sessions,
     })
+
+
 def movie_sessions(request):
-    search_query = request.GET.get('search', '')
+    search_query = request.GET.get('search', '').strip()
     sessions_list = MovieSession.objects.all().order_by('date')
 
+    print(f"🔍 ПОИСК: '{search_query}'")
+
     if search_query:
+        # Простой способ: ищем по всем возможным вариантам регистра
         sessions_list = sessions_list.filter(
-            Q(title__icontains=search_query) |
-            Q(description__icontains=search_query)
-        )
+            Q(title__contains=search_query.lower()) |
+            Q(title__contains=search_query.upper()) |
+            Q(title__contains=search_query.title()) |
+            Q(description__contains=search_query.lower()) |
+            Q(description__contains=search_query.upper()) |
+            Q(description__contains=search_query.title())
+        ).distinct()
+
+        print(f"✅ НАЙДЕНО: {sessions_list.count()}")
+        for session in sessions_list:
+            print(f"   - {session.title}")
 
     paginator = Paginator(sessions_list, 6)
     page = request.GET.get('page')
     sessions = paginator.get_page(page)
 
-    return render(request, 'core/movie_sessions.html', {'sessions': sessions})
+    return render(request, 'core/movie_sessions.html', {
+        'sessions': sessions,
+        'search_query': search_query
+    })
 
 
 @login_required
